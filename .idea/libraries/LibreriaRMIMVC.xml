@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="LibreriaRMIMVC">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../../../libreria-rmimvc-master/dist/LibreriaRMIMVC.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/../../../../libreria-rmimvc-master/dist/LibreriaRMIMVC.jar!/doc" />
+    </JAVADOC>
+    <SOURCES />
+  </library>
+</component>

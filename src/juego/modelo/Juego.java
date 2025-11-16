@@ -1,10 +1,14 @@
 package juego.modelo;
 
+import ar.edu.unlu.rmimvc.observer.ObservableRemoto;
+import juego.interactuar.IJuego;
+import juego.servicios.TopJugadores;
+
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Juego {
+public class Juego extends ObservableRemoto implements IJuego {
     private HashMap<Integer, Jugador> jugadores = new HashMap<>();
     private Ronda ronda;
     public int conectarJugador(String nombre) {
