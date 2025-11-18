@@ -27,12 +27,12 @@ public class Ronda {
         return this.jugadores.get(jugadorActual);
     }
 
-    public void siguenteTurno(){
-        //turnos
-        if (this.jugadorActual < this.jugadores.size() - 1){
+    public void siguienteTurno() {
+        // mejorar manejo de turnos
+        if (this.jugadorActual < this.jugadores.size() - 1) {
             this.jugadorActual = this.jugadorActual + 1;
-        }else{
-            this.jugadorActual=0;
+        } else {
+            this.jugadorActual = 0;
         }
     }
 

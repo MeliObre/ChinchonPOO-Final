@@ -3,6 +3,7 @@ package juego.modelo;
 import ar.edu.unlu.rmimvc.observer.ObservableRemoto;
 import juego.interactuar.IJuego;
 import juego.servicios.TopJugadores;
+import juego.enumerados.Evento;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -33,12 +34,6 @@ public class Juego extends ObservableRemoto implements IJuego {
 
     private void agregarJugador(Jugador jugador) {
         this.jugadores.put(jugador.getId(), jugador);
-    }
-
-    public void setListoPJugar (int jugador, boolean estaListo) throws RemoteException{
-        Jugador jugadorListo = this.getJugadores(jugador);
-        jugadorListo.setListoParaJugar(true);
-        this.empezarAJugar();
     }
 
     public void tomarTopeMazo(int jugadorQueToma) throws RemoteException {
