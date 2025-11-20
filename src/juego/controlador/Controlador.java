@@ -7,6 +7,7 @@ import juego.modelo.EventoConPayload;
 import juego.enumerados.Evento;
 import java.beans.PropertyChangeEvent;
 import java.util.Scanner;
+import java.util.InputMismatchException;
 
 public class Controlador implements PropertyChangeListener {
     private final Juego modeloJuego;
@@ -75,14 +76,14 @@ public class Controlador implements PropertyChangeListener {
                 this.modeloJuego.tomarTopePilaDescarte(jugador.getId());
             }
         } catch (Exception e) {
-            System.out.println("Opción inválida o error. Se pasa el turno.");
+            System.out.println("Opción inválida. Se pasa el turno.");
             // Manejo de error más robusto sería necesario
         }
     }
 
     private void pedirAccionDescarte() {
         Jugador actual = this.modeloJuego.getJugador(this.idJugadorActual);
-        System.out.println("\n[ACCIÓN REQUERIDA] (1-" + actual.getMano().size() + ": Descartar Carta / 0: Cerrar)");
+        System.out.println("\n[ACCIÓN REQUERIDA] (1-" + actual.getMano().getCantidadCartas() + ": Descartar Carta / 0: Cerrar)");
 
         int opcion = this.leerOpcion();
 
@@ -90,7 +91,7 @@ public class Controlador implements PropertyChangeListener {
             if (opcion == 0) {
                 // Intenta cerrar la ronda
                 this.modeloJuego.terminarRonda(actual.getId());
-            } else if (opcion >= 1 && opcion <= actual.getMano().size()) {
+            } else if (opcion >= 1 && opcion <= actual.getMano().getCantidadCartas()) {
                 // Descartar una carta por su índice
                 this.modeloJuego.descartar(opcion, actual.getId());
             } else {
