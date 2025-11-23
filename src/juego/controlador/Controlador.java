@@ -109,12 +109,19 @@ public class Controlador implements PropertyChangeListener {
                 break;
 
             case GANASTE:
-                this.mostrarGanadorFinal((int)payload);
+                // CORRECCIÓN CLAVE: El payload es un objeto EventoConPayload
+                // que contiene el ID del ganador en su dato numérico.
+                if (payload instanceof EventoConPayload) {
+                    EventoConPayload eventoGanaste = (EventoConPayload) payload;
+
+                    // Obtenemos el ID del ganador desde el payload
+                    int idGanador = eventoGanaste.getDatoNumerico();
+
+                    // Llamamos a la función de visualización
+                    this.mostrarGanadorFinal(idGanador);
+                }
                 break;
 
-            case PERDISTE:
-                // Lógica de eliminación...
-                break;
 
             default:
                 break;
@@ -187,6 +194,7 @@ public class Controlador implements PropertyChangeListener {
         System.out.println("\n==================================");
         System.out.println("!!! PARTIDA TERMINADA. GANADOR: " + ganador.getNombre().toUpperCase() + " !!!");
         System.out.println("==================================");
+        System.exit(0);
     }
 
     private void mostrarPuntajes() {
