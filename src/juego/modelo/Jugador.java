@@ -17,7 +17,7 @@ public class Jugador implements Serializable {
 
     public Jugador (String nombre){
         this.nombre = nombre;
-        this.id = Jugador.lastGeneratedID;
+        this.id = ++Jugador.lastGeneratedID;
     }
 
     public void tomarCartaMazo(Mazo mazoIn){
