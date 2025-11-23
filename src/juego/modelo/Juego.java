@@ -15,6 +15,8 @@ import java.util.HashMap;
 public class Juego  implements Serializable {
     private HashMap<Integer, Jugador> jugadores = new HashMap<>();
     private Ronda ronda;
+
+    private int contadorRonda = 0;
     public int conectarJugador(String nombre) {
         Jugador jugador = new Jugador(nombre);
         agregarJugador(jugador);
@@ -88,10 +90,16 @@ public class Juego  implements Serializable {
     }
 
     public void nuevaRonda() {
+        this.contadorRonda++; // 1. INCREMENTA EL CONTADOR
+
         ArrayList<Jugador> listaJugadores = new ArrayList<>(jugadores.values());
         int numeroJugadorMano = (int) (Math.random() * (jugadores.size() - 1));
         this.ronda = new Ronda(numeroJugadorMano, listaJugadores);
-        //this.notificarObservadores(Evento.NUEVO_TURNO);
+
+        // 2. NOTIFICA LA INICIACIÓN DE LA RONDA con el número como payload
+        this.cambios.firePropertyChange("RONDA_INICIADA", null, this.contadorRonda);
+
+        // 3. Notificación del primer turno (código existente)
         this.cambios.firePropertyChange(Evento.NUEVO_TURNO.toString(), null, this.ronda.getJugadorActual().getId());
     }
 
@@ -142,32 +150,54 @@ public class Juego  implements Serializable {
 
     public void terminarRonda(int idJugadorQueCierra)  {
         Jugador jugadorQueCierra = this.getJugador(idJugadorQueCierra);
-        TopJugadores.getInstancia().agregarJugador(jugadorQueCierra);
+
+        // 1. Lógica de Chequeo y Puntuación (Mantenida)
+        TopJugadores.getInstancia().agregarJugador(jugadorQueCierra); // Registra la victoria de la ronda
         if (!jugadorQueCierra.getMano().esCerrable())
-            return;
-
+            return; // No puede cerrar
         if (jugadorQueCierra != this.getJugadorActual())
-            return;
+            return; // No es su turno
 
+        // 2. Determinar Puntuación y Victoria Absoluta
         int puntajeDeCierre = jugadorQueCierra.getMano().cerrarMano();
         if (puntajeDeCierre <= -100) {
-            // victoria total y absoluta por chinchon
+            // Victoria total por chinchón (el juego termina inmediatamente)
             declararGanador(jugadorQueCierra);
-            return;
+            return; // TERMINA EL MÉTODO
         }
 
+        // 3. Sumar Puntos y Notificar Fin de Ronda
         this.ronda.sumarPuntos();
-        //this.notificarObservadores(Evento.RONDA_TERMINADA);
         this.cambios.firePropertyChange(Evento.RONDA_TERMINADA.toString(), null, null);
+
+        // 4. Chequear y Eliminar Perdedores (si superan el límite de 100)
+        // Usamos una lista temporal para evitar modificar el mapa 'jugadores' mientras iteramos
+        ArrayList<Jugador> jugadoresEliminados = new ArrayList<>();
         for (Jugador jugador : this.jugadores.values()) {
             if (jugador.getPuntos() >= 100) {
-                eliminarPerdedor(jugador);
+                jugadoresEliminados.add(jugador);
             }
+            // Reiniciar estado para la nueva ronda
             jugador.setListoParaJugar(false);
         }
-        if (this.getCantidadJugadores() < 2) {
-            declararGanador(this.getJugadores()[0]);
+
+        // Ejecutar la eliminación
+        for (Jugador perdedor : jugadoresEliminados) {
+            eliminarPerdedor(perdedor); // Este método elimina del mapa this.jugadores
         }
+
+        // 5. Lógica de Continuación/Fin de Partida (El Bucle de Partida)
+
+        if (this.getCantidadJugadores() < 2) {
+            // Si queda 1 jugador o menos, el juego termina y el último jugador gana.
+            if (this.getCantidadJugadores() == 1) {
+                declararGanador(this.getJugadores()[0]);
+            }
+            return; // TERMINA EL MÉTODO
+        }
+
+        // CORRECCIÓN CLAVE: Si quedan 2 o más jugadores, INICIAMOS LA SIGUIENTE RONDA.
+        this.nuevaRonda();
     }
 
     public int getCantidadJugadores() {
