@@ -38,28 +38,24 @@ public class Controlador implements PropertyChangeListener {
             }
         } while (cantidad < 2 || cantidad > 4);
 
-        // **AÑADIR ESTA LÍNEA CLAVE**
-        // Limpia el salto de línea pendiente del búfer después de leer el entero 'cantidad'.
         scanner.nextLine();
 
-        // 2. Pedir los nombres y agregar jugadores
         ArrayList<Integer> idsConectados = new ArrayList<>();
 
         for (int i = 1; i <= cantidad; i++) {
             System.out.print("Ingrese el nombre del Jugador " + i + ": ");
-            // Usamos nextLine() en lugar de next() para poder usar nombres con espacios
+
             String nombre = scanner.nextLine();
 
             // El resto del código de conexión
             int idJugador = this.modeloJuego.conectarJugador(nombre);
             idsConectados.add(idJugador);
         }
-        // 3. Iniciar el juego
+        // Iniciar el juego
         System.out.println("\nJuego configurado con " + cantidad + " jugadores. Iniciando...");
 
         //Todos los jugadores deben si o si estar LISTOS antes de iniciar con la partida
 
-        // Asumop que los IDs son 1, 2, 3, 4 y los ponemos listos.
         for (int id = 1; id <= cantidad; id++) {
             this.modeloJuego.setListoParaJugar(id, true);
         }
