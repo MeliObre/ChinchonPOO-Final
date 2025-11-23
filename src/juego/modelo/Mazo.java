@@ -5,23 +5,23 @@ import java.util.Collections;
 
 public class Mazo extends PilaCarta{
     public Mazo(){
-        for (int i = 1; i <= 12 ; i++){
-            Carta cartaAñadir = new Carta(Palo.BASTO, i);
-            this.anadirCarta(cartaAñadir);
+        // Crear las 48 cartas normales (1-12 por palo)
+        // itero sobre todos los valores del enum Palo
+        for (Palo palo : Palo.values()){
+            if (palo != Palo.COMODIN){
+                for (int i = 1; i <= 12 ; i++){
+                    Carta cartaAñadir = new Carta(palo, i);
+                    this.anadirCarta(cartaAñadir);
+                }
+            }
         }
-        for (int i = 1; i <= 12 ; i++){
-            Carta cartaAñadir = new Carta(Palo.ESPADA, i);
-            this.anadirCarta(cartaAñadir);
-        }
-        for (int i = 1; i <= 12 ; i++){
-            Carta cartaAñadir = new Carta(Palo.ORO, i);
-            this.anadirCarta(cartaAñadir);
-        }
-        for (int i = 1; i <= 12 ; i++){
-            Carta cartaAñadir = new Carta(Palo.COPA, i);
-            this.anadirCarta(cartaAñadir);
-        }
+
+        // COMODINES
+
+        this.anadirCarta(new Carta(Palo.COMODIN, 0));
+        this.anadirCarta(new Carta(Palo.COMODIN, 0));
     }
+
 
     public void barajar(){
         Collections.shuffle(this.getCartas());

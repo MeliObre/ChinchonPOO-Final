@@ -6,7 +6,7 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("\n**** CHINCHON (consola) ****\n");
 
-        // 1. Inicializar el Modelo
+        // inicializo el Modelo
         Juego modelo = new Juego();
 
         // 2. Inicializar el Controlador y registrarlo como Observador
