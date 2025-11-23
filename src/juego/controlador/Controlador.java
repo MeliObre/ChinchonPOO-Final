@@ -22,7 +22,43 @@ public class Controlador implements PropertyChangeListener {
         this.scanner = new Scanner(System.in);
     }
 
+    public void configurarPartida() {
+        System.out.println("--- Configuracion inicial de la partida ---");
+
+        // 1. Cantidad de jugadores
+        System.out.println("¿Cuántos jugadores participaran? (2, 3 o 4)");
+        int cantidad = this.leerOpcion();
+
+        if (cantidad < 2 || cantidad > 4) {
+            System.out.println("Cantidad inválida. El juego requiere entre 2 y 4 jugadores.");
+            return;
+        }
+
+        // 2. Pedir los nombres y agregar jugadores
+        for (int i = 1; i <= cantidad; i++) {
+            System.out.print("Ingrese el nombre del Jugador " + i + ": ");
+            // Usamos nextLine() para leer el nombre completo
+            String nombre = scanner.next();
+            this.modeloJuego.conectarJugador(nombre);
+        }
+
+        // 3. Iniciar el juego
+        System.out.println("\nJuego configurado con " + cantidad + " jugadores. Iniciando...");
+
+        //Todos los jugadores deben si o si estar LISTOS antes de iniciar con la partida
+
+        // Asumop que los IDs son 1, 2, 3, 4 y los ponemos listos.
+        for (int id = 1; id <= cantidad; id++) {
+            this.modeloJuego.setListoParaJugar(id, true);
+        }
+    }
+
     // --- 1. PROCESAMIENTO DE EVENTOS DEL MODELO ---
+
+    public void setListoParaJugar(int idJugador, boolean estaListo) {
+        // La clase Juego (Modelo) ya tiene el método para manejar esta lógica.
+        this.modeloJuego.setListoParaJugar(idJugador, estaListo);
+    }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
@@ -138,4 +174,6 @@ public class Controlador implements PropertyChangeListener {
     public void agregarJugador(String nombre) {
         this.modeloJuego.conectarJugador(nombre);
     }
+
+
 }
