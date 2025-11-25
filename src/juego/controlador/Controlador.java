@@ -8,6 +8,7 @@ import juego.enumerados.Evento;
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.Scanner;
+
 import java.util.InputMismatchException;
 
 public class Controlador implements PropertyChangeListener {

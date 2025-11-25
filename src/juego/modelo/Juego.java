@@ -44,7 +44,7 @@ public class Juego  implements Serializable {
     public void setListoParaJugar(int idJugador, boolean estaListo)  {
         Jugador jugadorListo = this.getJugador(idJugador);
 
-        // CORRECCIÓN LÓGICA: Usa el valor del parámetro (true o false)
+        // usa el valor del parámetro (true o false)
         jugadorListo.setListoParaJugar(estaListo);
 
         // Solo intenta empezar si el jugador se puso en 'true'
@@ -90,16 +90,17 @@ public class Juego  implements Serializable {
     }
 
     public void nuevaRonda() {
-        this.contadorRonda++; // 1. INCREMENTA EL CONTADOR
+        this.contadorRonda++; //  INCREMENTA EL CONTADOR
 
         ArrayList<Jugador> listaJugadores = new ArrayList<>(jugadores.values());
         int numeroJugadorMano = (int) (Math.random() * (jugadores.size() - 1));
         this.ronda = new Ronda(numeroJugadorMano, listaJugadores);
 
-        // 2. NOTIFICA LA INICIACIÓN DE LA RONDA con el número como payload
+        //  NOTIFICA LA INICIACION DE LA RONDA con el numero como payload
+        // PARA LA VISTA CONSOLA INICIALMNTE
         this.cambios.firePropertyChange("RONDA_INICIADA", null, this.contadorRonda);
 
-        // 3. Notificación del primer turno (código existente)
+        // Notificacion del primer turno
         this.cambios.firePropertyChange(Evento.NUEVO_TURNO.toString(), null, this.ronda.getJugadorActual().getId());
     }
 
@@ -151,26 +152,26 @@ public class Juego  implements Serializable {
     public void terminarRonda(int idJugadorQueCierra)  {
         Jugador jugadorQueCierra = this.getJugador(idJugadorQueCierra);
 
-        // 1. Lógica de Chequeo y Puntuación (Mantenida)
+        // Logica de Chequeo y Puntuacion
         TopJugadores.getInstancia().agregarJugador(jugadorQueCierra); // Registra la victoria de la ronda
         if (!jugadorQueCierra.getMano().esCerrable())
             return; // No puede cerrar
         if (jugadorQueCierra != this.getJugadorActual())
             return; // No es su turno
 
-        // 2. Determinar Puntuación y Victoria Absoluta
+        // determinar puntuacion y victoria absoluta
         int puntajeDeCierre = jugadorQueCierra.getMano().cerrarMano();
         if (puntajeDeCierre <= -100) {
-            // Victoria total por chinchón (el juego termina inmediatamente)
+            // Victoria total por chinchon (el juego termina inmediatamente)
             declararGanador(jugadorQueCierra);
-            return; // TERMINA EL MÉTODO
+            return;
         }
 
-        // 3. Sumar Puntos y Notificar Fin de Ronda
+        // sumar Puntos y notificar Fin de Ronda
         this.ronda.sumarPuntos();
         this.cambios.firePropertyChange(Evento.RONDA_TERMINADA.toString(), null, null);
 
-        // 4. Chequear y Eliminar Perdedores (si superan el límite de 100)
+        // Chequear y Eliminar Perdedores (si superan el limite de 100)
         // Usamos una lista temporal para evitar modificar el mapa 'jugadores' mientras iteramos
         ArrayList<Jugador> jugadoresEliminados = new ArrayList<>();
         for (Jugador jugador : this.jugadores.values()) {
@@ -181,22 +182,22 @@ public class Juego  implements Serializable {
             jugador.setListoParaJugar(false);
         }
 
-        // Ejecutar la eliminación
+        // Ejecutar la eliminacion
         for (Jugador perdedor : jugadoresEliminados) {
-            eliminarPerdedor(perdedor); // Este método elimina del mapa this.jugadores
+            eliminarPerdedor(perdedor); // Este metodo elimina del mapa this.jugadores
         }
 
-        // 5. Lógica de Continuación/Fin de Partida (El Bucle de Partida)
+        // logica de Continuación/Fin de Partida (El Bucle de Partida)
 
         if (this.getCantidadJugadores() < 2) {
-            // Si queda 1 jugador o menos, el juego termina y el último jugador gana.
+            // Si queda 1 jugador o menos, el juego termina y el ultimo jugador gana.
             if (this.getCantidadJugadores() == 1) {
                 declararGanador(this.getJugadores()[0]);
             }
-            return; // TERMINA EL MÉTODO
+            return;
         }
 
-        // CORRECCIÓN CLAVE: Si quedan 2 o más jugadores, INICIAMOS LA SIGUIENTE RONDA.
+        // CORRECCION CLAVE: Si quedan 2 o mAs jugadores, se inicia la siguente ronda
         this.nuevaRonda();
     }
 

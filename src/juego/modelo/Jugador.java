@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.util.Random;
 
 public class Jugador implements Serializable {
-    //crea un contador secreto y compartido para la clase Jugador para que asigne un número unico
+    //crea un contador secreto y compartido para la clase Jugador para que asigne un numero unico
     // a cada jugador al momento de crearse, y asegura que ese contador no se guarde
     transient private static int lastGeneratedID = 0;
 

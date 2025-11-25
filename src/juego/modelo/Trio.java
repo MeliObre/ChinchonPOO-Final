@@ -7,7 +7,7 @@ public class Trio implements TipoJuego, Serializable {
 
     private final List<Carta> cartas;
 
-    // Constructor: Recibe las cartas que forman esta combinación específica
+    // Constructor: Recibe las cartas que forman esta combinacion especifica
     public Trio(List<Carta> cartas) {
         this.cartas = new ArrayList<>(cartas);
     }
@@ -19,14 +19,14 @@ public class Trio implements TipoJuego, Serializable {
 
     @Override
     public boolean juegoValido() {
-        // Lógica para validar que estas cartas realmente forman un trío.
+
         if (cartas.size() < 3 || cartas.size() > 4) return false;
 
-        // Se asume que el primer número es el número del trío
+        // Asumo que el primer numero es el numero del trio
         int primerNumero = cartas.get(0).getNumero();
         for (Carta carta : cartas) {
             if (carta.getNumero() != primerNumero) {
-                // Si encontramos alguna carta con número diferente, no es trío
+                // Si encontramos alguna carta con numero diferente, no es trio
                 return false;
             }
         }

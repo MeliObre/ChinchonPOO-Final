@@ -25,9 +25,9 @@ public class Escalera implements TipoJuego, Serializable {
 
         Palo primerPalo = cartas.get(0).getPalo();
 
-        // 1. Verifica mismo palo y consecutividad
+        // verifica mismo palo y consecutividad
         for (int i = 0; i < cartas.size(); i++) {
-            // Nota: Aquí la lógica real debe manejar el comodín (Palo.COMODIN)
+            // la logica debe manejar el comodin (Palo.COMODIN)
             if (cartas.get(i).getPalo() != primerPalo) return false;
 
             if (i > 0) {
