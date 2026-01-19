@@ -17,6 +17,8 @@ public class Juego  implements Serializable {
     private Ronda ronda;
 
     private int contadorRonda = 0;
+
+    private boolean incluir8y9 = true;
     public int conectarJugador(String nombre) {
         Jugador jugador = new Jugador(nombre);
         agregarJugador(jugador);
@@ -94,7 +96,7 @@ public class Juego  implements Serializable {
 
         ArrayList<Jugador> listaJugadores = new ArrayList<>(jugadores.values());
         int numeroJugadorMano = (int) (Math.random() * (jugadores.size() - 1));
-        this.ronda = new Ronda(numeroJugadorMano, listaJugadores);
+        this.ronda = new Ronda(numeroJugadorMano, listaJugadores, this.incluir8y9);
 
         //  NOTIFICA LA INICIACION DE LA RONDA con el numero como payload
         // PARA LA VISTA CONSOLA INICIALMNTE

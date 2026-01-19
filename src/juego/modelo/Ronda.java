@@ -3,14 +3,16 @@ package juego.modelo;
 import java.util.ArrayList;
 
 public class Ronda {
-    private Mazo mazo = new Mazo();
+    private Mazo mazo ;
     private PilaCarta pilaDescarte = new PilaCarta();
     private int jugadorActual;
     private ArrayList<Jugador> jugadores;
 
-    public Ronda(int JugadorMano, ArrayList<Jugador> jugadores){
+    public Ronda(int JugadorMano, ArrayList<Jugador> jugadores, boolean incluir8y9){
         this.jugadorActual = JugadorMano;
         this.jugadores = jugadores;
+        //ajuste, inicializo el mazo con el parametro de 9 y 9
+        this.mazo=new Mazo(incluir8y9);
         this.resetManos();
         this.mazo.barajar(); // Comentar para pruebas
         this.mazo.repartir(this.jugadores, 7, false);
@@ -28,8 +30,8 @@ public class Ronda {
     }
 
     public void siguienteTurno() {
-        // mejorar manejo de turnos
         if (this.jugadorActual < this.jugadores.size() - 1) {
+            //si no es el ultimo jugador, incrementa el indice al siguiente jugador de la lista.
             this.jugadorActual = this.jugadorActual + 1;
         } else {
             this.jugadorActual = 0;

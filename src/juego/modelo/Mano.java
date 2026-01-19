@@ -77,7 +77,7 @@ public class Mano extends ConjuntoCartas{
 
     private  int obtenerValorPuntaje(Carta carta) {
         if (carta.getPalo() == Palo.COMODIN) {
-            return 25; // O el valor de penalizacion que uses (ej: 25, 50)
+            return 25; // penalizacion por comodin
         }
 
         int numero = carta.getNumero();
@@ -102,7 +102,7 @@ public class Mano extends ConjuntoCartas{
             return null;
 
         for (int i = indiceInicial; i < grupos.size(); i++) {
-            //ahora el grupo es de tipo TipoJuego (Trío o Escalera)
+            //ahora el grupo es de tipo TipoJuego (Trio o Escalera)
             TipoJuego grupo = grupos.get(i);
 
             // verifico Solapamiento, usop grupo.getCartas() para acceder a la lista
@@ -126,11 +126,11 @@ public class Mano extends ConjuntoCartas{
 
     public  List<Carta> cartasNoUsadas(List<Carta> mano) {
         List<TipoJuego> combinacionesPosibles = new ArrayList<>();
-        combinacionesPosibles.addAll(this.encontrarTrio(mano));
-        combinacionesPosibles.addAll(this.encontrarEscaleras(mano));
+        combinacionesPosibles.addAll(Trio.encontrarEn(mano));
+        combinacionesPosibles.addAll(Escalera.encontrarEn(mano));
 
         List<Carta> cartasUsadas = null;
-        //busco la combinación mas larga >= 3 cartas
+        //busco la combinacion mas larga >= 3 cartas
         for (int objetivo = mano.size(); objetivo >= 3; objetivo--) {
             cartasUsadas = buscarCombinacion(combinacionesPosibles, objetivo, new ArrayList<>(), 0);
             if (cartasUsadas != null) {
@@ -154,8 +154,8 @@ public class Mano extends ConjuntoCartas{
             return false;
         List<TipoJuego> combinacionesPosibles = new ArrayList<>();
         // Dentro de esListaCerrable:
-        combinacionesPosibles.addAll(this.encontrarTrio(mano)); // Pasa la variable 'mano' como argumento
-        combinacionesPosibles.addAll(this.encontrarEscaleras(mano));
+        combinacionesPosibles.addAll(Trio.encontrarEn(mano)); // Pasa la variable mano como argumento
+        combinacionesPosibles.addAll(Escalera.encontrarEn(mano));
         if (buscarCombinacion(combinacionesPosibles, 7,new ArrayList<>(),0) != null){
             return true;
         }
@@ -195,7 +195,7 @@ public class Mano extends ConjuntoCartas{
 
         return resultCierreRecord;
     }
-
+/*
     private  List<List<Carta>> combinar(List<Carta> elementos, int n) {
         if (n > elementos.size())
             return Collections.emptyList();
@@ -221,17 +221,22 @@ public class Mano extends ConjuntoCartas{
         return combinaciones;
     }
 
+ */
 
+/*
     private List<Escalera> encontrarEscaleras(List<Carta> mano) {
+        // Agrupo todas las cartas de la mano por palo para buscar escaleras,
+        // ya que una escalera debe ser del mismo palo.
         Map<Palo, List<Carta>> porPalo = new HashMap<>();
-        for (Carta carta : mano) { // USAR 'mano'
+        for (Carta carta : mano) { // uso mano
             porPalo.computeIfAbsent(carta.getPalo(), k -> new ArrayList<>()).add(carta);
         }
 
-        //cambio el tipo de retorno: devolvera objetos Escalera
+        // devolvera objetos Escalera
         List<Escalera> escalasValidas = new ArrayList<>();
-
+        // itero sobre cada palo
         for (List<Carta> grupo : porPalo.values()) {
+            // uso TreeSet para obtener solo los numeros unicos y ordenados del palo
             Set<Integer> numerosUnicos = new TreeSet<>();
             for (Carta c : grupo)
                 numerosUnicos.add(c.getNumero());
@@ -239,11 +244,13 @@ public class Mano extends ConjuntoCartas{
 
             for (int i = 0; i < listaNumeros.size(); i++) {
                 List<Carta> secuencia = new ArrayList<>();
+                // Comienza a iterar desde el número actual para formar una secuencia
                 for (int j = i; j < listaNumeros.size(); j++) {
-                    // (Logica de secuencia...)
+                    // // se rompe si el numero actual no es el consecutivo del anterior
                     if (j > i && listaNumeros.get(j) != listaNumeros.get(j - 1) + 1)
                         break;
                     int num = listaNumeros.get(j);
+                    //busca la carta REAL que corresponde a este 'num' y que aún no ha sido usada en esta secuencia.
                     Optional<Carta> opcion = grupo.stream()
                             .filter(c -> c.getNumero() == num && !secuencia.contains(c))
                             .findFirst();
@@ -251,7 +258,7 @@ public class Mano extends ConjuntoCartas{
                         break;
                     secuencia.add(opcion.get());
 
-                    // si se encuentra una secuencia valida (>= 3), CREAMOS un objeto Escalera
+                    // si se encuentra una secuencia valida (>= 3), se crea un objeto Escalera
                     if (secuencia.size() >= 3) {
                         // crea y guarda el objeto Escalera, no una lista de listas
                         escalasValidas.add(new Escalera(new ArrayList<>(secuencia)));
@@ -263,16 +270,18 @@ public class Mano extends ConjuntoCartas{
     }
 
     private List<Trio> encontrarTrio(List<Carta> mano) {
+       // uso un Map para agrupar todas las cartas por su numero
         Map<Integer, List<Carta>> porNumero = new HashMap<>();
         for (Carta carta : mano) { // USAR 'mano'
             porNumero.computeIfAbsent(carta.getNumero(), k -> new ArrayList<>()).add(carta);
         }
 
-        // cambie el tipo de retorno devolverá objetos Trio
+        // cambie el tipo de retorno devolvera objetos Trio
         List<Trio> triosValidos = new ArrayList<>();
+        //Iteraro sobre cada grupo de numeros iguales
         for (Map.Entry<Integer, List<Carta>> entrada : porNumero.entrySet()) {
             List<Carta> grupo = entrada.getValue();
-            if (grupo.size() >= 3) {
+            if (grupo.size() >= 3) { //solo sigo si hay almenos 3 cartas del mismo palo
 
                 // usar combinar para obtener todas las posibles combinaciones de 3
                 List<List<Carta>> combinacionesDeTres = this.combinar(grupo, 3);
@@ -288,5 +297,7 @@ public class Mano extends ConjuntoCartas{
         }
         return triosValidos;
     }
+
+ */
 
 }

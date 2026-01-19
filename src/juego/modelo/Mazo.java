@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class Mazo extends PilaCarta{
-    public Mazo(){
+    public Mazo(boolean incluirOchoYnueve){
         // Crear las 48 cartas normales (1-12 por palo)
         // itero sobre todos los valores del enum Palo
         for (Palo palo : Palo.values()){
             if (palo != Palo.COMODIN){
                 for (int i = 1; i <= 12 ; i++){
+                    //Si no quiero 8 y 9, salteo
+                    if (!incluirOchoYnueve && (i== 8 || i == 9)){
+                        continue;
+                    }
                     Carta cartaAñadir = new Carta(palo, i);
                     this.anadirCarta(cartaAñadir);
                 }

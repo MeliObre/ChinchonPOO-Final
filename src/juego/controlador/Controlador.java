@@ -15,7 +15,7 @@ public class Controlador implements PropertyChangeListener {
     private final Juego modeloJuego;
     private final Scanner scanner;
 
-    // Almacenamos el ID del jugador actual para saber a quién pedir input
+    // almaceno el id del jugador actual para saber a quien le tengo qu pedir input
     private int idJugadorActual;
 
     public Controlador(Juego modelo) {
@@ -29,7 +29,7 @@ public class Controlador implements PropertyChangeListener {
 
         int cantidad = 0;
 
-        // 1. Preguntar por la cantidad de jugadores (Bucle do-while)
+        // pregunto por la cnaridad de jugadore
         do {
             System.out.println("¿Cuántos jugadores participarán? (2, 3 o 4)");
             cantidad = this.leerOpcion();
@@ -48,21 +48,20 @@ public class Controlador implements PropertyChangeListener {
 
             String nombre = scanner.nextLine();
 
-            // El resto del código de conexión
             int idJugador = this.modeloJuego.conectarJugador(nombre);
             idsConectados.add(idJugador);
         }
-        // Iniciar el juego
+        // inicia el juego
         System.out.println("\nJuego configurado con " + cantidad + " jugadores. Iniciando...");
 
-        //Todos los jugadores deben si o si estar LISTOS antes de iniciar con la partida
+        // todos los jugadores tiene que estar listos
 
         for (int id = 1; id <= cantidad; id++) {
             this.modeloJuego.setListoParaJugar(id, true);
         }
     }
 
-    // --- 1. PROCESAMIENTO DE EVENTOS DEL MODELO ---
+    // eventos
 
     public void setListoParaJugar(int idJugador, boolean estaListo) {
         // La clase Juego (Modelo) ya tiene el método para manejar esta lógica.
@@ -74,17 +73,17 @@ public class Controlador implements PropertyChangeListener {
         String nombreEvento = evt.getPropertyName();
         Object payload = evt.getNewValue();
 
-        // 1. MANEJO DE EVENTOS PERSONALIZADOS (Fuera del Enum Evento)
+        // solo para vista consola manejo de eventos
         if (nombreEvento.equals("RONDA_INICIADA")) {
             int numRonda = (int) payload;
             System.out.println("\n==================================");
             System.out.println("====== INICIO DE RONDA " + numRonda + " ======");
             System.out.println("==================================");
-            return; // Termina la función aquí, ya que el evento NUEVO_TURNO vendrá después
+            return;
         }
 
-        // 2. CONVERTIR EL NOMBRE DEL EVENTO A ENUM (Lógica existente)
-        // Solo llegamos aquí si el evento es uno de los valores del enum (NUEVO_TURNO, RONDA_TERMINADA, etc.)
+        // convierto el nombre del evennto a enum C
+        // Solo llega a este paso si el evento es uno de los valores del enum (NUEVO_TURNO, RONDA_TERMINADA, etc.)
         Evento evento = Evento.valueOf(nombreEvento);
 
         switch (evento) {
@@ -100,21 +99,21 @@ public class Controlador implements PropertyChangeListener {
                 break;
 
             case RONDA_TERMINADA:
-                // Llama a la nueva función de visualización al final de la ronda
+                // Llama a la nueva funcion de visualización al final de la ronda
                 this.mostrarPuntajes();
-                // NO se necesita break o return aquí si no hay más lógica.
-                break;
+
+                break; // esto lo puedo sacara futuro
 
             case GANASTE:
-                // CORRECCIÓN CLAVE: El payload es un objeto EventoConPayload
-                // que contiene el ID del ganador en su dato numérico.
+                // el payload es un objeto EventoConPayload
+                // que contiene el ID del ganador en su dato numerico.
                 if (payload instanceof EventoConPayload) {
                     EventoConPayload eventoGanaste = (EventoConPayload) payload;
 
-                    // Obtenemos el ID del ganador desde el payload
+                    // Obtengo el ID del ganador desde el payload
                     int idGanador = eventoGanaste.getDatoNumerico();
 
-                    // Llamamos a la función de visualización
+                    // llamo a la función de visualización
                     this.mostrarGanadorFinal(idGanador);
                 }
                 break;
@@ -153,7 +152,7 @@ public class Controlador implements PropertyChangeListener {
                 }
             } catch (Exception e) {
                 // Este catch es para errores más serios del Modelo (ej: mazo vacío)
-                System.out.println("⚠️ ERROR INTERNO: No se pudo tomar la carta. " + e.getMessage());
+                System.out.println("ERROR INTERNO: No se pudo tomar la carta. " + e.getMessage());
                 accionValida = true; // Salir del bucle para evitar reintento eterno en caso de error serio.
             }
         } while (!accionValida); // Repetir mientras la acción no sea válida
@@ -178,7 +177,7 @@ public class Controlador implements PropertyChangeListener {
                     System.out.println("Índice o acción incorrecta. Por favor, intenta de nuevo.");
                 }
             } catch (Exception e) {
-                System.out.println("⚠️ ERROR: No se pudo realizar la acción. El juego podría estar en un estado inválido.");
+                System.out.println("ERROR: No se pudo realizar la acción. El juego podría estar en un estado inválido.");
                 accionValida = true; // Salir para evitar más errores
             }
         } while (!accionValida);
@@ -214,7 +213,7 @@ public class Controlador implements PropertyChangeListener {
         }
     }
 
-    // --- MÉTODOS PARA EL LANZADOR (Main) ---
+
 
     public void iniciarJuego() {
         this.modeloJuego.empezarAJugar();

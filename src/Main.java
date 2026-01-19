@@ -9,7 +9,7 @@ public class Main {
         // inicializo el Modelo
         Juego modelo = new Juego();
 
-        // 2. Inicializar el Controlador y registrarlo como Observador
+        // Inicializar el Controlador y registrarlo como Observador
         Controlador controlador = new Controlador(modelo);
 
         // Delegamos toda la secuencia interactiva al Controlador
