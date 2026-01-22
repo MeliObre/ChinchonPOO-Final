@@ -6,5 +6,6 @@ public enum Evento {
     ACTUALIZAR_CARTAS,
     RONDA_TERMINADA,
     GANASTE,
-    PERDISTE
+    PERDISTE,
+    RONDA_INICIADA
 }

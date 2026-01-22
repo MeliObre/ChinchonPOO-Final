@@ -1,30 +1,39 @@
 package juego.controlador;
 
-import java.beans.PropertyChangeListener;
+
+
+import ar.edu.unlu.rmimvc.cliente.IControladorRemoto;
+import ar.edu.unlu.rmimvc.observer.IObservableRemoto;
+import juego.interactuar.IJuego;
 import juego.modelo.Juego;
 import juego.modelo.Jugador;
 import juego.modelo.EventoConPayload;
 import juego.enumerados.Evento;
 import java.beans.PropertyChangeEvent;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 import java.util.InputMismatchException;
 
-public class Controlador implements PropertyChangeListener {
-    private final Juego modeloJuego;
+public class Controlador implements IControladorRemoto {
+    //private final Juego modeloJuego;
     private final Scanner scanner;
 
     // almaceno el id del jugador actual para saber a quien le tengo qu pedir input
     private int idJugadorActual;
+    private IJuego modeloJuego;
 
-    public Controlador(Juego modelo) {
-        this.modeloJuego = modelo;
-        this.modeloJuego.agregarObservador(this); // Se registra al Modelo
+    public Controlador() {
         this.scanner = new Scanner(System.in);
     }
 
-    public void configurarPartida() {
+    // OBLIGATORIO: Método para que la librería nos de acceso al modelo remoto
+    @Override
+    public <T extends IObservableRemoto> void setModeloRemoto(T modeloRemoto) {
+        this.modeloJuego = (IJuego) modeloRemoto; //
+    }
+    public void configurarPartida() throws RemoteException {
         System.out.println("--- Configuracion inicial de la partida ---");
 
         int cantidad = 0;
@@ -63,70 +72,56 @@ public class Controlador implements PropertyChangeListener {
 
     // eventos
 
-    public void setListoParaJugar(int idJugador, boolean estaListo) {
+    public void setListoParaJugar(int idJugador, boolean estaListo) throws RemoteException {
         // La clase Juego (Modelo) ya tiene el método para manejar esta lógica.
         this.modeloJuego.setListoParaJugar(idJugador, estaListo);
     }
 
     @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        String nombreEvento = evt.getPropertyName();
-        Object payload = evt.getNewValue();
+    public void actualizar(IObservableRemoto modelo, Object cambio) throws RemoteException {
 
-        // solo para vista consola manejo de eventos
-        if (nombreEvento.equals("RONDA_INICIADA")) {
-            int numRonda = (int) payload;
-            System.out.println("\n==================================");
-            System.out.println("====== INICIO DE RONDA " + numRonda + " ======");
-            System.out.println("==================================");
-            return;
+
+        // En RMI-MVC, el 'cambio' es el objeto que mandaste en notificarObservadores
+        if (cambio instanceof EventoConPayload) {
+            EventoConPayload ep = (EventoConPayload) cambio;
+            Evento evento = ep.getEvento();
+
+            switch (evento) {
+                case RONDA_INICIADA:
+                    System.out.println("\n==================================");
+                    System.out.println("====== INICIO DE RONDA " + ep.getDatoNumerico() + " ======");
+                    System.out.println("==================================");
+                    break;
+
+                case NUEVO_TURNO:
+                    this.idJugadorActual = ep.getDatoNumerico();
+                    Jugador j = this.modeloJuego.getJugador(this.idJugadorActual);
+                    this.mostrarEstadoTurno(j);
+                    this.pedirAccionInicial(j);
+                    break;
+
+                case DESCARTAR_O_CERRAR:
+                    Jugador actual = this.modeloJuego.getJugador(this.idJugadorActual);
+                    System.out.println("\n--- MANO ACTUALIZADA (8 CARTAS) ---");
+                    this.mostrarEstadoTurno(actual);
+                    this.pedirAccionDescarte();
+                    break;
+
+                case RONDA_TERMINADA:
+                    this.mostrarPuntajes();
+                    break;
+
+                case GANASTE:
+                    this.mostrarGanadorFinal(ep.getDatoNumerico());
+                    break;
+            }
         }
 
-        // convierto el nombre del evennto a enum C
-        // Solo llega a este paso si el evento es uno de los valores del enum (NUEVO_TURNO, RONDA_TERMINADA, etc.)
-        Evento evento = Evento.valueOf(nombreEvento);
-
-        switch (evento) {
-            case NUEVO_TURNO:
-                this.idJugadorActual = (int) payload;
-                Jugador jugador = this.modeloJuego.getJugador(this.idJugadorActual);
-                this.mostrarEstadoTurno(jugador);
-                this.pedirAccionInicial(jugador);
-                break;
-
-            case DESCARTAR_O_CERRAR:
-                this.pedirAccionDescarte();
-                break;
-
-            case RONDA_TERMINADA:
-                // Llama a la nueva funcion de visualización al final de la ronda
-                this.mostrarPuntajes();
-
-                break; // esto lo puedo sacara futuro
-
-            case GANASTE:
-                // el payload es un objeto EventoConPayload
-                // que contiene el ID del ganador en su dato numerico.
-                if (payload instanceof EventoConPayload) {
-                    EventoConPayload eventoGanaste = (EventoConPayload) payload;
-
-                    // Obtengo el ID del ganador desde el payload
-                    int idGanador = eventoGanaste.getDatoNumerico();
-
-                    // llamo a la función de visualización
-                    this.mostrarGanadorFinal(idGanador);
-                }
-                break;
-
-
-            default:
-                break;
-        }
     }
 
     // --- 2. MÉTODOS DE VISTA/ENTRADA (Consola) ---
 
-    private void mostrarEstadoTurno(Jugador jugador) {
+    private void mostrarEstadoTurno(Jugador jugador) throws RemoteException {
         System.out.println("\n--- TURNO DE " + jugador.getNombre().toUpperCase() + " (ID: " + jugador.getId() + ") ---");
         System.out.println("TOPE DESCARTE: " + this.modeloJuego.getTopePila().toString());
         System.out.println("TU MANO:\n" + jugador.getMano().toString());
@@ -158,7 +153,7 @@ public class Controlador implements PropertyChangeListener {
         } while (!accionValida); // Repetir mientras la acción no sea válida
     }
 
-    private void pedirAccionDescarte() {
+    private void pedirAccionDescarte() throws RemoteException {
         Jugador actual = this.modeloJuego.getJugador(this.idJugadorActual);
         boolean accionValida = false;
 
@@ -185,7 +180,7 @@ public class Controlador implements PropertyChangeListener {
 
     // --- MÉTODOS DE FIN Y UTILIDAD ---
 
-    private void mostrarGanadorFinal(int idGanador) {
+    private void mostrarGanadorFinal(int idGanador) throws RemoteException {
         Jugador ganador = this.modeloJuego.getJugador(idGanador);
         System.out.println("\n==================================");
         System.out.println("!!! PARTIDA TERMINADA. GANADOR: " + ganador.getNombre().toUpperCase() + " !!!");
@@ -193,7 +188,7 @@ public class Controlador implements PropertyChangeListener {
         System.exit(0);
     }
 
-    private void mostrarPuntajes() {
+    private void mostrarPuntajes() throws RemoteException {
         System.out.println("--- PUNTAJES ACUMULADOS ---");
 
         // Obtenemos los jugadores directamente del Modelo para ver sus puntos actuales
@@ -215,11 +210,11 @@ public class Controlador implements PropertyChangeListener {
 
 
 
-    public void iniciarJuego() {
+    public void iniciarJuego() throws RemoteException {
         this.modeloJuego.empezarAJugar();
     }
 
-    public void agregarJugador(String nombre) {
+    public void agregarJugador(String nombre) throws RemoteException {
         this.modeloJuego.conectarJugador(nombre);
     }
 

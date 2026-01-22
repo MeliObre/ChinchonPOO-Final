@@ -12,38 +12,48 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Juego  implements Serializable {
+public class Juego  extends ObservableRemoto implements IJuego {
     private HashMap<Integer, Jugador> jugadores = new HashMap<>();
     private Ronda ronda;
 
     private int contadorRonda = 0;
 
     private boolean incluir8y9 = true;
-    public int conectarJugador(String nombre) {
+
+    public Juego() throws RemoteException {
+        super();
+    }
+    @Override
+    public int conectarJugador(String nombre) throws RemoteException{
         Jugador jugador = new Jugador(nombre);
         agregarJugador(jugador);
         System.out.println("Se conectó el jugador: " + jugador.getNombre() + " id:" + jugador.getId());
         return jugador.getId();
     }
-    public void desconectarJugador(int usuarioId) {
+
+    @Override
+    public void desconectarJugador(int usuarioId) throws RemoteException{
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'desconectarJugador'");
     }
-    private transient PropertyChangeSupport cambios = new PropertyChangeSupport(this);
+
+    //--------------------------------
+    //private transient PropertyChangeSupport cambios = new PropertyChangeSupport(this);
 
     // metodos del Observer
-    public void agregarObservador(PropertyChangeListener listener) {
-        cambios.addPropertyChangeListener(listener);
-    }
-    public void removerObservador(PropertyChangeListener listener) {
-        cambios.removePropertyChangeListener(listener);
-    }
+   // public void agregarObservador(PropertyChangeListener listener) {
+     //   cambios.addPropertyChangeListener(listener);
+    //}
+    //public void removerObservador(PropertyChangeListener listener) {
+      //  cambios.removePropertyChangeListener(listener);
+    //}
     //------------------------------------------------
-    public Jugador[] getJugadores() {
+
+    public Jugador[] getJugadores() throws RemoteException{
 
         return jugadores.values().toArray(new Jugador[0]);
     }
-    public void setListoParaJugar(int idJugador, boolean estaListo)  {
+    public void setListoParaJugar(int idJugador, boolean estaListo) throws RemoteException  {
         Jugador jugadorListo = this.getJugador(idJugador);
 
         // usa el valor del parámetro (true o false)
@@ -60,25 +70,33 @@ public class Juego  implements Serializable {
         this.jugadores.put(jugador.getId(), jugador);
     }
 
-    public void tomarTopeMazo(int jugadorQueToma)  {
+    @Override
+    public void tomarTopeMazo(int jugadorQueToma) throws RemoteException {
         Jugador jugador = this.getJugador(jugadorQueToma);
         if (jugador != this.getJugadorActual())
             return;
 
         this.ronda.tomarTopeMazo(jugador);
         //this.notificarObservadores(Evento.DESCARTAR_O_CERRAR);
-         this.cambios.firePropertyChange(Evento.DESCARTAR_O_CERRAR.toString(), null, null);
+         //this.cambios.firePropertyChange(Evento.DESCARTAR_O_CERRAR.toString(), null, null);
+
+        this.notificarObservadores(new EventoConPayload(Evento.DESCARTAR_O_CERRAR));
     }
-    public void tomarTopePilaDescarte(int jugadorQueToma)  {
+
+    @Override
+    public void tomarTopePilaDescarte(int jugadorQueToma) throws RemoteException  {
         Jugador jugador = this.getJugador(jugadorQueToma);
         if (jugador != this.getJugadorActual())
             return;
         this.ronda.tomarTopePilaDescarte(jugador);
         //this.notificarObservadores(Evento.DESCARTAR_O_CERRAR);
-        this.cambios.firePropertyChange(Evento.DESCARTAR_O_CERRAR.toString(), null, null);
+        //this.cambios.firePropertyChange(Evento.DESCARTAR_O_CERRAR.toString(), null, null);
+
+        this.notificarObservadores(new EventoConPayload(Evento.DESCARTAR_O_CERRAR));
     }
 
-    public void descartar(int cartaElegida, int jugadorQueDescarta)  {
+    @Override
+    public void descartar(int cartaElegida, int jugadorQueDescarta) throws RemoteException  {
         Jugador jugador = this.getJugador(jugadorQueDescarta);
         if (jugador != this.getJugadorActual())
             return;
@@ -87,11 +105,12 @@ public class Juego  implements Serializable {
         this.siguienteTurno();
     }
 
-    public Mano getMano(int numJugador) {
+    @Override
+    public Mano getMano(int numJugador) throws RemoteException {
         return this.getJugador(numJugador).getMano();
     }
 
-    public void nuevaRonda() {
+    public void nuevaRonda() throws RemoteException {
         this.contadorRonda++; //  INCREMENTA EL CONTADOR
 
         ArrayList<Jugador> listaJugadores = new ArrayList<>(jugadores.values());
@@ -100,28 +119,36 @@ public class Juego  implements Serializable {
 
         //  NOTIFICA LA INICIACION DE LA RONDA con el numero como payload
         // PARA LA VISTA CONSOLA INICIALMNTE
-        this.cambios.firePropertyChange("RONDA_INICIADA", null, this.contadorRonda);
+        //this.cambios.firePropertyChange("RONDA_INICIADA", null, this.contadorRonda);
 
         // Notificacion del primer turno
-        this.cambios.firePropertyChange(Evento.NUEVO_TURNO.toString(), null, this.ronda.getJugadorActual().getId());
+        //this.cambios.firePropertyChange(Evento.NUEVO_TURNO.toString(), null, this.ronda.getJugadorActual().getId());
+        // Notificamos inicio de ronda
+        this.notificarObservadores(new EventoConPayload(Evento.RONDA_INICIADA, this.contadorRonda));
+        // Notificamos el primer turno
+        this.notificarObservadores(new EventoConPayload(Evento.NUEVO_TURNO, this.ronda.getJugadorActual().getId()));
     }
 
-    public void siguienteTurno() {
+    public void siguienteTurno() throws RemoteException{
         this.ronda.siguienteTurno();
         //this.notificarObservadores(Evento.NUEVO_TURNO);
-        this.cambios.firePropertyChange(Evento.NUEVO_TURNO.toString(), null, this.ronda.getJugadorActual().getId());
+        //this.cambios.firePropertyChange(Evento.NUEVO_TURNO.toString(), null, this.ronda.getJugadorActual().getId());
+        this.notificarObservadores(new EventoConPayload(Evento.NUEVO_TURNO, this.ronda.getJugadorActual().getId()));
     }
 
-    public Jugador getJugadorActual() {
+    @Override
+    public Jugador getJugadorActual() throws RemoteException {
         return this.ronda.getJugadorActual();
     }
 
-    public Carta getTopePila() {
+    @Override
+    public Carta getTopePila() throws RemoteException {
         return this.ronda.getTopePila();
     }
 
 
-    public void empezarAJugar()  {
+    @Override
+    public void empezarAJugar() throws RemoteException  {
         if (this.jugadores.size() < 2) {
             System.out.println("no hay suficientes jugadores para empezar");
             return;
@@ -137,21 +164,23 @@ public class Juego  implements Serializable {
         this.nuevaRonda();
     }
 
-    private void eliminarPerdedor(Jugador perdedor) {
+    private void eliminarPerdedor(Jugador perdedor) throws RemoteException {
         EventoConPayload eventoPerder = new EventoConPayload(Evento.PERDISTE, perdedor.getId());
-        this.cambios.firePropertyChange(Evento.PERDISTE.toString(), null, eventoPerder);
+        //this.cambios.firePropertyChange(Evento.PERDISTE.toString(), null, eventoPerder);
+        this.notificarObservadores(eventoPerder);
         //this.notificarObservadores(eventoPerder);
         this.jugadores.remove(perdedor.getId());
     }
 
-    private void declararGanador(Jugador ganador)  {
+    private void declararGanador(Jugador ganador) throws RemoteException {
         EventoConPayload eventoGanar = new EventoConPayload(Evento.GANASTE, ganador.getId());
-        //this.notificarObservadores(eventoGanar);
-        this.cambios.firePropertyChange(Evento.GANASTE.toString(), null, eventoGanar);
+        this.notificarObservadores(eventoGanar);
+        //this.cambios.firePropertyChange(Evento.GANASTE.toString(), null, eventoGanar);
         // guardar jugador en el top de ganadores
     }
 
-    public void terminarRonda(int idJugadorQueCierra)  {
+    @Override
+    public void terminarRonda(int idJugadorQueCierra) throws RemoteException {
         Jugador jugadorQueCierra = this.getJugador(idJugadorQueCierra);
 
         // Logica de Chequeo y Puntuacion
@@ -171,7 +200,8 @@ public class Juego  implements Serializable {
 
         // sumar Puntos y notificar Fin de Ronda
         this.ronda.sumarPuntos();
-        this.cambios.firePropertyChange(Evento.RONDA_TERMINADA.toString(), null, null);
+        //this.cambios.firePropertyChange(Evento.RONDA_TERMINADA.toString(), null, null);
+        this.notificarObservadores(new EventoConPayload(Evento.RONDA_TERMINADA));
 
         // Chequear y Eliminar Perdedores (si superan el limite de 100)
         // Usamos una lista temporal para evitar modificar el mapa 'jugadores' mientras iteramos
@@ -203,19 +233,23 @@ public class Juego  implements Serializable {
         this.nuevaRonda();
     }
 
-    public int getCantidadJugadores() {
+    @Override
+    public int getCantidadJugadores() throws RemoteException {
         return this.jugadores.size();
     }
 
-    public Jugador getJugador(int idJugador) {
+    @Override
+    public Jugador getJugador(int idJugador) throws RemoteException {
         return this.jugadores.get(idJugador);
     }
 
-    public void testearConectividad()  {
+    @Override
+    public void testearConectividad() throws RemoteException  {
         System.out.println("mostrando mensaje en el servidor");
     }
 
-    public String getJugadoresTopString()  {
+    @Override
+    public String getJugadoresTopString() throws RemoteException  {
         return TopJugadores.getInstancia().getJugadoresTopString();
     }
 }
