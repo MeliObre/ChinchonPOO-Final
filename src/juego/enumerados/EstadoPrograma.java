@@ -1,0 +1,12 @@
+package juego.enumerados;
+
+public enum EstadoPrograma {
+    ESPERANDO_LISTO_PARA_JUGAR,
+    DESCARTAR_O_CERRAR,
+    REGISTRANDO_JUGADOR,
+    ESPERANDO_TURNO,
+    ELIGIENDO_MAZO_O_PILA,
+    MOSTRANDO_PUNTOS,
+    GANO,
+    PERDIO
+}
